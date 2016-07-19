@@ -21,7 +21,7 @@
         "sensio/distribution-bundle": "~5.0",
         "sensio/framework-extra-bundle": "^3.0.2",
         "incenteev/composer-parameter-handler": "~2.0",
-        "ddeboer/data-import": "@stable"
+        "ddeboer/data-import-bundle": "~0.1"
     },
     "require-dev": {
         "sensio/generator-bundle": "~3.0",
