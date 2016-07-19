@@ -4,9 +4,81 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c9edcdf3312c91892fe0b1b61ccd44fe",
-    "content-hash": "cc0bcdc69a86e608f2ad5379605e9ef3",
+    "hash": "f0261d0f422ca604b53909f7dab33876",
+    "content-hash": "2ffc0f4b860698793b181f9441156a65",
     "packages": [
+        {
+            "name": "ddeboer/data-import",
+            "version": "0.19.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ddeboer/data-import.git",
+                "reference": "9fb9571370a8a0dd57a1c2bd3ef6f8dc00388291"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ddeboer/data-import/zipball/9fb9571370a8a0dd57a1c2bd3ef6f8dc00388291",
+                "reference": "9fb9571370a8a0dd57a1c2bd3ef6f8dc00388291",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "psr/log": "~1.0"
+            },
+            "require-dev": {
+                "doctrine/dbal": "~2.4",
+                "doctrine/orm": "~2.4",
+                "ext-iconv": "*",
+                "ext-mbstring": "*",
+                "ext-sqlite3": "*",
+                "henrikbjorn/phpspec-code-coverage": "~1.0",
+                "phpoffice/phpexcel": "*",
+                "phpspec/phpspec": "~2.1",
+                "symfony/console": "~2.5.0",
+                "symfony/property-access": "~2.5",
+                "symfony/validator": "~2.3.0"
+            },
+            "suggest": {
+                "doctrine/dbal": "If you want to use the DbalReader",
+                "ext-iconv": "For the CharsetValueConverter",
+                "ext-mbstring": "For the CharsetValueConverter",
+                "phpoffice/phpexcel": "If you want to use the ExcelReader",
+                "symfony/console": "If you want to use the ConsoleProgressWriter",
+                "symfony/property-access": "If you want to use the ObjectConverter",
+                "symfony/validator": "to use the ValidatorFilter"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ddeboer\\DataImport\\": "src/",
+                    "Ddeboer\\DataImport\\Tests\\": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "The community",
+                    "homepage": "https://github.com/ddeboer/data-import/graphs/contributors"
+                },
+                {
+                    "name": "David de Boer",
+                    "email": "david@ddeboer.nl"
+                }
+            ],
+            "description": "Import data from, and export data to, a range of file formats and media",
+            "keywords": [
+                "csv",
+                "data",
+                "doctrine",
+                "excel",
+                "export",
+                "import"
+            ],
+            "time": "2016-06-09 14:20:13"
+        },
         {
             "name": "doctrine/annotations",
             "version": "v1.2.7",
@@ -2169,22 +2241,15 @@
             "time": "2016-06-29 05:31:50"
         }
     ],
-    "aliases": [
-
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [
-
-    ],
+    "stability-flags": {
+        "ddeboer/data-import": 0
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=5.3.9"
     },
-    "platform-dev": [
-
-    ],
-    "platform-overrides": {
-        "php": "5.3.9"
-    }
+    "platform-dev": []
 }
