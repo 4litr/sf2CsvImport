@@ -1,3 +1,7 @@
+import:
+    resource: "@ImportBundle/Resources/config/routing.yml"
+    prefix:   /
+
 app:
     resource: "@AppBundle/Controller/"
     type:     annotation

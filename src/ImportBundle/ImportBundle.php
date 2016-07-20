@@ -1,9 +1,9 @@
 <?php
 
-namespace AppBundle;
+namespace ImportBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class AppBundle extends Bundle
+class ImportBundle extends Bundle
 {
 }
