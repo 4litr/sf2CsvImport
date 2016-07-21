@@ -33,6 +33,11 @@ class ImportService
     public function importProductsWorkflow(Reader $reader, $test = false) {
         $workflow = new StepAggregator($reader);
 
+        if ($test)
+        {
+
+        }
+
 
     }
 
