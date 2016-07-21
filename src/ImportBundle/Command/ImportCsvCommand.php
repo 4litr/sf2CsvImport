@@ -9,8 +9,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+
 
 class ImportCsvCommand extends ContainerAwareCommand
 {
@@ -57,17 +57,14 @@ class ImportCsvCommand extends ContainerAwareCommand
         //check for Truncating Products table request
         if ($input->getOption('truncate')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This will truncate your product items table. Process anyway?', false);
+            $question = new ConfirmationQuestion('This will truncate your product items table. Process anyway?<info>[y/n]</info>>', false);
             if (!$helper->ask($input, $output, $question)) {
                 return;
             }
 
-            //truncating products table...
+            //TODO: how to pass param
+            $output->write('truncating products table...');
             $services->truncateTable();
-        }
-
-        if ($input->getOption('test_run')) {
-            echo "test=================";
         }
 
         try {
@@ -77,23 +74,8 @@ class ImportCsvCommand extends ContainerAwareCommand
             return;
         }
 
-        $progress = new ProgressBar($output, count($reader)-1);
+        $services->importProductsWorkflow($reader, $output, $input->getOption('test_run'));
 
-        //For performance reasons in case of huge files
-        $progress->setRedrawFrequency(1000);
-
-        $progress->setMessage('Stating products importing...');
-        $progress->start();
-
-        foreach ($reader as $row) {
-            var_dump($row);
-            $progress->advance();
-            usleep(300000);
-        }
-
-        $services->importProductsWorkflow($reader, $input->getOption('test_run'));
-
-        $progress->finish();
         $output->writeln('');
         $output->writeln('Finished!!!');
     }
