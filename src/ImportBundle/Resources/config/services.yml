@@ -1,4 +1,4 @@
 services:
     import.csv:
         class: ImportBundle\Services\ImportService
-#        arguments: ["@import.csv", "plain_value"]
+        arguments: ["@doctrine.orm.default_entity_manager", "plain_value"]
