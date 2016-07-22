@@ -13,6 +13,7 @@ use Ddeboer\DataImport\Workflow\StepAggregator;
 use Doctrine\ORM\EntityManager; //for truncate table service
 use Ddeboer\DataImport\Reader as Reader;
 use Ddeboer\DataImport\Writer\ConsoleTableWriter;
+use ImportBundle\Factory\ImportFactory;
 use Symfony\Component\Console\Helper\Table;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
 use Ddeboer\DataImport\Filter;
@@ -25,6 +26,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ImportService
 {
     /**
+     * @var ImportFactory
+     */
+    protected $factory;
+    /**
      * @var EntityManager
      */
     protected $entityManager;
@@ -35,15 +40,23 @@ class ImportService
     protected $validator;
 
     /**
+     * @param ImportFactory $factory
      * @param EntityManager $entityManager
+     * @param ValidatorInterface $validator
      */
-    public function __construct(EntityManager $entityManager, ValidatorInterface $validator)
+    public function __construct(ImportFactory $factory, EntityManager $entityManager, ValidatorInterface $validator)
     {
+        $this->factory = $factory;
         $this->entityManager = $entityManager;
         $this->validator = $validator;
     }
 
-    public function importProductsWorkflow(Reader $reader, $output, $test = false) {
+    public function import($filePath) {
+        $fileExtension = $this->getFileExtension($filePath);
+        $importer = $this->factory->createImporter($fileExtension);
+
+
+
         $workflow = new StepAggregator($reader);
         $progressWriter = new ConsoleProgressWriter($output,$reader);
         $workflow->addWriter($progressWriter);
@@ -70,7 +83,17 @@ class ImportService
         $workflow->process();
     }
 
+    /**
+     * @param string $file
+     * @return string
+     */
+    protected function getFileExtension($file)
+    {
+        return substr(strrchr($file, '.'), 1);
+    }
+
     //truncating table...
+
     public function truncateTable() {
         $this->entityManager->clear('ImportBundle:ProductItem');
     }

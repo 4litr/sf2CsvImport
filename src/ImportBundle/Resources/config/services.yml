@@ -1,4 +1,14 @@
 services:
-    import.csv:
+    import.factory:
+        class: ImportBundle\Factory\ImportFactory
+        arguments:
+    import.service:
         class: ImportBundle\Services\ImportService
-        arguments: ["@doctrine.orm.default_entity_manager", "@validator", "plain_value"]
+        arguments:
+            - "@import.factory"
+            - "@doctrine.orm.default_entity_manager"
+            - "@validator"
+            - "plain_value"
+#parameters:
+#    entity: "ImportBundle:ProductItem"
+

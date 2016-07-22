@@ -21,12 +21,6 @@ class ImportCsvCommand extends ContainerAwareCommand
                 InputArgument::REQUIRED,
                 'Enter file path: '
             )
-            ->addArgument(
-                'file_format',
-                InputArgument::OPTIONAL,
-                'Enter file format(default:csv): ',
-                'csv'
-            )
             ->addOption(
                 'test_run',
                 null,
@@ -39,20 +33,19 @@ class ImportCsvCommand extends ContainerAwareCommand
     {
         $now = date('d-m-Y(G:i:s)');
         $filePath = $input->getArgument('file_path');
-        $fileFormat = $input->getArgument('file_format');
         $output->writeln("<info>Started: {$now}</info>");
 
         //switching on import services...
-        $services = $this->getContainer()->get('import.csv');
+        $importService = $this->getContainer()->get('import.service');
 
-        try {
-            $reader = ImportFactory::getReader($fileFormat, $filePath);
-        } catch (FileNotFoundException $ex) {
-            $output->writeln("<error>{$ex->getMessage()}</error>");
-            return;
-        }
+//        try {
+//            $reader = ImportFactory::getReader($fileFormat, $filePath);
+//        } catch (FileNotFoundException $ex) {
+//            $output->writeln("<error>{$ex->getMessage()}</error>");
+//            return;
+//        }
 
-        $services->importProductsWorkflow($reader, $output, $input->getOption('test_run'));
+        $importService->import($filePath);
 
         $output->writeln('---');
         $output->writeln('Finished!!!');
