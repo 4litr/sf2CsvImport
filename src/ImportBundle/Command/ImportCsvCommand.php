@@ -1,5 +1,4 @@
 <?php
-
 namespace ImportBundle\Command;
 
 use ImportBundle\Factory\ImportFactory;
@@ -8,9 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
-
 
 class ImportCsvCommand extends ContainerAwareCommand
 {
@@ -35,12 +32,6 @@ class ImportCsvCommand extends ContainerAwareCommand
                 null,
                 InputOption::VALUE_NONE,
                 'Initiates test run without database inserts'
-            )
-            ->addOption(
-                'truncate',
-                null,
-                InputOption::VALUE_NONE,
-                'Truncates Mysql table before import'
             );
     }
 
@@ -54,19 +45,6 @@ class ImportCsvCommand extends ContainerAwareCommand
         //switching on import services...
         $services = $this->getContainer()->get('import.csv');
 
-        //check for Truncating Products table request
-        if ($input->getOption('truncate')) {
-            $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This will truncate your product items table. Process anyway?<info>[y/n]</info>>', false);
-            if (!$helper->ask($input, $output, $question)) {
-                return;
-            }
-
-            //TODO: how to pass param
-            $output->write('truncating products table...');
-            $services->truncateTable();
-        }
-
         try {
             $reader = ImportFactory::getReader($fileFormat, $filePath);
         } catch (FileNotFoundException $ex) {
@@ -76,7 +54,7 @@ class ImportCsvCommand extends ContainerAwareCommand
 
         $services->importProductsWorkflow($reader, $output, $input->getOption('test_run'));
 
-        $output->writeln('');
+        $output->writeln('---');
         $output->writeln('Finished!!!');
     }
 }

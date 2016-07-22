@@ -47,6 +47,7 @@ class ImportFactory
 
             //Tell the reader that the first row in the CSV file contains column headers
             $readerInstance->setHeaderRowNumber(0);
+            $readerInstance->setStrict(false);
             return $readerInstance;
         } catch (\Exception $ex) {
             throw new FileNotFoundException;

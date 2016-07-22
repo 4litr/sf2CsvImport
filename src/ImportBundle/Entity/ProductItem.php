@@ -4,7 +4,6 @@ namespace ImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-//use Symfony\Component\Validator\Constraints\DateTime;
 
 
 /**
@@ -12,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="tblProductData", uniqueConstraints={@ORM\UniqueConstraint(name="strProductCode", columns={"strProductCode"})})
  * @ORM\Entity
+ * @ORM\HasLifecycleCallbacks()
  */
 class ProductItem
 {
@@ -75,12 +75,17 @@ class ProductItem
      * @var float
      * @Assert\Type(type="numeric", message="Property cost should be of type numeric")
      * @Assert\NotBlank(message="Property cost is blank")
+     * @Assert\Range(
+     *      min = 0,
+     *      max = 1000,
+     *      minMessage = "Item cost must be at least {{ limit }}",
+     *      maxMessage = "Item cost cannot be taller than {{ limit }}")
      * @ORM\Column(name="fltCost", type="float", options={"unsigned"=true})
      */
     private $cost;
 
     /**
-     * @var string|null
+     * @var bool
      */
     private $discontinued;
 
@@ -169,14 +174,15 @@ class ProductItem
 
     /**
      * Set dtmAdded
+     * @ORM\PrePersist()
      *
      * @param \DateTime $dtmAdded
      *
      * @return ProductItem
      */
-    public function setDtmAdded($dtmAdded)
+    public function setDtmAdded()
     {
-        $this->dtmAdded = $dtmAdded;
+        $this->dtmAdded = new \DateTime();
 
         return $this;
     }
@@ -200,7 +206,7 @@ class ProductItem
      */
     public function setDtmDiscontinued()
     {
-        if ($this->discontinued === 'yes') {
+        if ($this->discontinued) {
             $this->dtmDiscontinued = new \DateTime();
         }
 
@@ -214,6 +220,7 @@ class ProductItem
     public function setStmTimestamp()
     {
         $this->stmTimestamp = new \DateTime();
+        return $this;
     }
 
     /**
