@@ -9,48 +9,82 @@
 namespace ImportBundle\Factory;
 
 use Ddeboer\DataImport\Reader;
-use Ddeboer\DataImport\Reader\CsvReader;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Ddeboer\DataImport\Step\MappingStep;
+use Ddeboer\DataImport\Writer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use ImportBundle\Constraints\ConstraintsInterface;
 
 class ImportFactory
 {
+    const EXT_CSV = 'csv';
+
     /**
-     * returns file reader(currently only csv supported)
-     * @param $fileFormat
-     * @param $filePath
-     * @return Reader
+     * @var Writer
      */
-    public static function getReader($fileFormat, $filePath)
+    protected $writer;
+
+    /**
+     * @var ValidatorInterface
+     */
+    protected $validator;
+
+    /**
+     * @var ConstraintsInterface
+     */
+    protected $constraints;
+
+    /**
+     * @var MappingStep
+     */
+    protected $converter;
+
+    /**
+     * @param Writer $writer
+     * @param ValidatorInterface $validator
+     * @param MappingStep $converter
+     * @param ConstraintsInterface $constraints
+     */
+    public function __construct(
+        Writer $writer,
+        ValidatorInterface $validator,
+        MappingStep $converter,
+        ConstraintsInterface $constraints
+    )
     {
-        $readerInstance = null;
+        $this->writer = $writer;
+        $this->validator = $validator;
+        $this->converter = $converter;
+        $this->helper = $constraints;
+    }
+
+    public function createImporter($fileFormat)
+    {
+        echo(123);die;
 
         switch ($fileFormat) {
-            case 'csv':
-            default:
-            $readerInstance = self::getCsvFileReader($filePath);
+            case self::EXT_CSV:
+                $importer = new CsvImporter();
                 break;
+            default:
+                throw new \Exception('Format not found');
         }
 
-        return $readerInstance;
+        $this->setUp($importer);
+        return $importer;
     }
 
     /**
-     * @param $filePath
-     * @return CsvReader
-     * @throws \Exception
+     * @param Importer $importer
+     * @return $this
      */
-    protected static function getCsvFileReader($filePath)
+    protected function setUp(Importer $importer)
     {
-        try{
-            $file = new \SplFileObject($filePath);
-            $readerInstance = new CsvReader($file);
+        $importer->setWriter($this->writer);
+        $importer->setConstraints($this->helper);
+        $importer->setValidator($this->validator);
+        $importer->setConverter($this->converter);
 
-            //Tell the reader that the first row in the CSV file contains column headers
-            $readerInstance->setHeaderRowNumber(0);
-            return $readerInstance;
-        } catch (\Exception $ex) {
-            throw new FileNotFoundException;
-        }
+        return $this;
+
     }
-
 }
