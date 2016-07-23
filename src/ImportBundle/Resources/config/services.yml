@@ -1,14 +1,33 @@
+parameters:
+    product_item_entity: 'ImportBundle:ProductItem'
+
 services:
+    ddboer.dataimport.writer:
+        class: Ddeboer\DataImport\Writer\DoctrineWriter
+        arguments:
+            - '@doctrine.orm.default_entity_manager'
+            - '%product_item_entity%'
+    ddboer.mapping.converter:
+        class: Ddeboer\DataImport\Step\MappingStep
+    import.constraints:
+        class: ImportBundle\Constraints\Constraints
+        arguments: 
+            - '@validator'
     import.factory:
         class: ImportBundle\Factory\ImportFactory
         arguments:
+            - '@ddboer.dataimport.writer'
+            - '@validator'
+            - '@ddboer.mapping.converter'
+            - '@import.constraints'
     import.service:
         class: ImportBundle\Services\ImportService
         arguments:
-            - "@import.factory"
-            - "@doctrine.orm.default_entity_manager"
-            - "@validator"
-            - "plain_value"
-#parameters:
-#    entity: "ImportBundle:ProductItem"
+            - '@import.factory'
+            - '@doctrine.orm.default_entity_manager'
+            - '@validator'
+    truncate.service:
+        class: ImportBundle\Services\TruncateService
+        arguments:
+            - '@doctrine.orm.default_entity_manager'
 

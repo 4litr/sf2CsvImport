@@ -44,7 +44,11 @@ class ImportService
      * @param EntityManager $entityManager
      * @param ValidatorInterface $validator
      */
-    public function __construct(ImportFactory $factory, EntityManager $entityManager, ValidatorInterface $validator)
+    public function __construct(
+        ImportFactory $factory,
+        EntityManager $entityManager,
+        ValidatorInterface $validator
+    )
     {
         $this->factory = $factory;
         $this->entityManager = $entityManager;
@@ -91,11 +95,4 @@ class ImportService
     {
         return substr(strrchr($file, '.'), 1);
     }
-
-    //truncating table...
-
-    public function truncateTable() {
-        $this->entityManager->clear('ImportBundle:ProductItem');
-    }
-
 }

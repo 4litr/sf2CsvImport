@@ -10,7 +10,7 @@ namespace ImportBundle\Factory;
 
 use Ddeboer\DataImport\Reader;
 use Ddeboer\DataImport\Step\MappingStep;
-use Ddeboer\DataImport\Writer;
+use Ddeboer\DataImport\Writer as DdeboerWriter;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use ImportBundle\Constraints\ConstraintsInterface;
 
@@ -19,7 +19,7 @@ class ImportFactory
     const EXT_CSV = 'csv';
 
     /**
-     * @var Writer
+     * @var DdeboerWriter
      */
     protected $writer;
 
@@ -39,13 +39,13 @@ class ImportFactory
     protected $converter;
 
     /**
-     * @param Writer $writer
+     * @param DdeboerWriter $writer
      * @param ValidatorInterface $validator
      * @param MappingStep $converter
      * @param ConstraintsInterface $constraints
      */
     public function __construct(
-        Writer $writer,
+        DdeboerWriter $writer,
         ValidatorInterface $validator,
         MappingStep $converter,
         ConstraintsInterface $constraints

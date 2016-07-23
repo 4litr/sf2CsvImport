@@ -28,7 +28,7 @@ class TruncateProductsTableCommand extends ContainerAwareCommand
 
         //TODO: how to pass param
         $output->write('truncating products table...');
-        $services = $this->getContainer()->get('import.csv');
+        $services = $this->getContainer()->get('truncate.service');
         $services->truncateTable();
         $output->writeln('');
         $output->writeln('Done!!!');
