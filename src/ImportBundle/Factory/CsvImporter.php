@@ -3,15 +3,20 @@
 namespace ImportBundle\Factory;
 
 use Ddeboer\DataImport\Reader;
+use Ddeboer\DataImport\Writer\DoctrineWriter as Doctrine;
 use Ddeboer\DataImport\Step\FilterStep;
 use Ddeboer\DataImport\Step\MappingStep;
 use Ddeboer\DataImport\Workflow\StepAggregator;
+use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
+use Doctrine\ORM\Mapping\Entity;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use ImportBundle\ImportResult\ImportResult;
+use ImportBundle\Filters as Filters;
 
-/**
- * Class CsvImporter
- * @package ImportBundle\Factory
- */
-class CsvImporter extends Importer
+
+
+
+class CsvImporter extends Importer implements ImporterInterface
 {
     /**
      * @param string $file
@@ -21,8 +26,9 @@ class CsvImporter extends Importer
     {
         $file = new \SplFileObject($file);
         $reader = new Reader\CsvReader($file);
-        $reader->setHeaderRowNumber(0);
 
+        //ignores csv headers row
+        $reader->setHeaderRowNumber(0);
         return $reader;
     }
 
@@ -44,41 +50,32 @@ class CsvImporter extends Importer
     }
 
     /**
-     * @param Reader $reader
-     * @return StepAggregator
+     * @param $filePath
+     * @return ImportResult
      */
-    public function getWorkflow(Reader $reader)
+    public function import($filePath)
     {
-        $workflow = new StepAggregator($reader);
+        $reader = $this->getReader($filePath);
+        $workflow = $this->getWorkflow($reader);
 
-        $this->writer->disableTruncate();
-        $workflow->setSkipItemOnFailure(true);
-
-        $workflow->addStep($this->getConverter(), 100);
-        $workflow->addStep($this->getFilterStep(), 90);
-
-        if (!$this->testOption) {
-            $workflow->addWriter($this->writer);
-        }
-
-        return $workflow;
+        return $this->getResult($workflow->process(), $reader);
     }
 
     /**
      * @return FilterStep
      */
-    protected function getFilterStep()
+    protected function getFilter()
     {
         $filterStep = new FilterStep();
 
-        $filterStep->add((new Filter\UniqueFilter('strProductCode'))->getCallable(), 100);
-        $filterStep->add(
-            (new Filter\ConditionFilter('strProductCode', function ($data) {
-                return $data['fltCost'] >= $this->getCost() || $data['intStock'] >= $this->getStock();
-            }, sprintf('Item cost less than %s and product stock less than %s - [name]', $this->getCost(), $this->getStock())))                     ->getCallable(), 90);
+        $filterStep->add((new Filters\UniqueProductFilter('strProductCode'))->getCallable(), 100);
+        $filterStep->add((new Filters\ConditionsFilter('strProductCode', function ($data) {
+                return $data['fltCost'] >= Filters\ConditionsFilter::COST_MIN_TRESHOLD || $data['intStock'] >= Filters\ConditionsFilter::STOCK_MIN_TRESHOLD;
+            }, 'Items cost is less than ' . Filters\ConditionsFilter::COST_MIN_TRESHOLD .' and stock value is less than ' . Filters\ConditionsFilter::STOCK_MIN_TRESHOLD))
+                ->getCallable(), 90);
 
         $filterStep->add(
-            (new Filter\ValidatorFilter($this->validator, $this->constraintHelper, Item::class))
+            (new Filters\AssertsFilter($this->validator, $this->constraints, Entity::class))
                 ->getCallable(), 80
         );
 
@@ -86,13 +83,26 @@ class CsvImporter extends Importer
     }
 
     /**
-     * {@inheritdoc}
+     * @param Reader $reader
+     * @return StepAggregator
      */
-    public function process($file)
+    public function getWorkflow(Reader $reader)
     {
-        $reader = $this->getReader($file);
-        $workflow = $this->getWorkflow($reader);
+        $workflow = new StepAggregator($reader);
+        $workflow->setSkipItemOnFailure(true);
 
-        return $this->getResult($workflow->process(), $reader);
+        if ($this->writer instanceof Doctrine) {
+            $this->writer->disableTruncate();
+            $progressWriter = new ConsoleProgressWriter(new ConsoleOutput() ,$reader);
+            $workflow->addWriter($progressWriter);
+            $workflow->addWriter($this->writer);
+
+            //Field names mappings to csv headers names...
+            $workflow->addStep($this->getConverter());
+            $workflow->addStep($this->getFilter());
+        }
+        $workflow->addWriter($this->writer);
+
+        return $workflow;
     }
 }

@@ -13,6 +13,7 @@ use Ddeboer\DataImport\Workflow\StepAggregator;
 use Doctrine\ORM\EntityManager; //for truncate table service
 use Ddeboer\DataImport\Reader as Reader;
 use Ddeboer\DataImport\Writer\ConsoleTableWriter;
+use ImportBundle\Factory\ImporterInterface;
 use ImportBundle\Factory\ImportFactory;
 use Symfony\Component\Console\Helper\Table;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
@@ -55,44 +56,25 @@ class ImportService
         $this->validator = $validator;
     }
 
-    public function import($filePath) {
+    /**
+     * @param $filePath
+     * @param $testMode
+     * @return \ImportBundle\ImportResult\ImportResult
+     */
+    public function startImport($filePath, $testMode) {
         $fileExtension = $this->getFileExtension($filePath);
-        $importer = $this->factory->createImporter($fileExtension);
+        $importer = $this->factory->createImporter($fileExtension, $testMode);
+        $result = $importer->import($filePath);
 
-
-
-        $workflow = new StepAggregator($reader);
-        $progressWriter = new ConsoleProgressWriter($output,$reader);
-        $workflow->addWriter($progressWriter);
-
-
-        if ($test) {
-            $table = new Table($output);
-            $workflow->addWriter(new ConsoleTableWriter($output, $table));
-        } else {
-            $doctrineWriter = new DoctrineWriter($this->entityManager, 'ImportBundle:ProductItem');
-            $workflow->addWriter($doctrineWriter);
-            //Validation
-            $filter = new ValidatorFilter($this->validator);
-            //
-            //var_dump($filter);die;
-            $filter->add('stock', new Assert\NotBlank());
-            $filterStep = new FilterStep($filter);
-
-            $workflow->addStep($filterStep);
-
-
-        }
-
-        $workflow->process();
+        return $result;
     }
 
     /**
-     * @param string $file
+     * @param string $filePath
      * @return string
      */
-    protected function getFileExtension($file)
+    protected function getFileExtension($filePath)
     {
-        return substr(strrchr($file, '.'), 1);
+        return substr(strrchr($filePath, '.'), 1);
     }
 }

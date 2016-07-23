@@ -115,16 +115,6 @@ class ProductItem
     }
 
     /**
-     * Get strProductName
-     *
-     * @return string
-     */
-    public function getStrProductName()
-    {
-        return $this->strProductName;
-    }
-
-    /**
      * Set strProductDesc
      *
      * @param string $strProductDesc
@@ -136,16 +126,6 @@ class ProductItem
         $this->strProductDesc = $strProductDesc;
 
         return $this;
-    }
-
-    /**
-     * Get strProductDesc
-     *
-     * @return string
-     */
-    public function getStrProductDesc()
-    {
-        return $this->strProductDesc;
     }
 
     /**
@@ -163,22 +143,35 @@ class ProductItem
     }
 
     /**
-     * Get strProductCode
+     * Set stock
      *
-     * @return string
+     * @param integer $stock
+     *
+     * @return ProductItem
      */
-    public function getStrProductCode()
+    public function setIntStock($stock)
     {
-        return $this->strProductCode;
+        $this->stock = $stock;
+
+        return $this;
     }
 
     /**
-     * Set dtmAdded
-     * @ORM\PrePersist()
+     * Set Cost
      *
-     * @param \DateTime $dtmAdded
+     * @param float $cost
      *
      * @return ProductItem
+     */
+    public function setFltCost($cost)
+    {
+        $this->cost = $cost;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
      */
     public function setDtmAdded()
     {
@@ -188,21 +181,7 @@ class ProductItem
     }
 
     /**
-     * Get dtmAdded
-     *
-     * @return \DateTime
-     */
-    public function getDtmAdded()
-    {
-        return $this->dtmAdded;
-    }
-
-    /**
-     * Set dtmDiscontinued
-     *
-     * @param \DateTime $dtmDiscontinued
-     *
-     * @return ProductItem
+     * @return $this
      */
     public function setDtmDiscontinued()
     {
@@ -221,53 +200,5 @@ class ProductItem
     {
         $this->stmTimestamp = new \DateTime();
         return $this;
-    }
-
-    /**
-     * Get dtmDiscontinued
-     *
-     * @return \DateTime
-     */
-    public function getDtmDiscontinued()
-    {
-        return $this->dtmDiscontinued;
-    }
-
-    /**
-     * Get stmTimestamp
-     *
-     * @return \DateTime
-     */
-    public function getStmTimestamp()
-    {
-        return $this->stmTimestamp;
-    }
-
-    /**
-     * Get intProductDataId
-     *
-     * @return integer
-     */
-    public function getIntProductDataId()
-    {
-        return $this->intProductDataId;
-    }
-
-    /**
-     * @Assert\IsFalse(message="Product cost less than 5 and product stock less than 10")
-     * @return bool
-     */
-    public function isProductLessCostAndStock()
-    {
-        return ($this->cost < 5 && $this->stock < 10);
-    }
-
-    /**
-     * @Assert\IsFalse(message="Product cost over than 1000")
-     * @return bool
-     */
-    public function isProductOverCost()
-    {
-        return ($this->cost > 1000);
     }
 }

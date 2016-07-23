@@ -8,9 +8,9 @@
  */
 namespace ImportBundle\Factory;
 
-use Ddeboer\DataImport\Reader;
 use Ddeboer\DataImport\Step\MappingStep;
-use Ddeboer\DataImport\Writer as DdeboerWriter;
+use Ddeboer\DataImport\Writer\DoctrineWriter as DdeboerDoctrineWriter;
+use Ddeboer\DataImport\Writer\ConsoleTableWriter as DdeboerTableWriter;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use ImportBundle\Constraints\ConstraintsInterface;
 
@@ -19,9 +19,14 @@ class ImportFactory
     const EXT_CSV = 'csv';
 
     /**
-     * @var DdeboerWriter
+     * @var DdeboerDoctrineWriter
      */
-    protected $writer;
+    protected $doctrineWriter;
+
+    /**
+     * @var DdeboerTableWriter
+     */
+    protected $tableWriter;
 
     /**
      * @var ValidatorInterface
@@ -39,28 +44,30 @@ class ImportFactory
     protected $converter;
 
     /**
-     * @param DdeboerWriter $writer
+     * ImportFactory constructor.
+     * @param DdeboerDoctrineWriter $doctrineWriter
+     * @param DdeboerTableWriter $tableWriter
      * @param ValidatorInterface $validator
      * @param MappingStep $converter
      * @param ConstraintsInterface $constraints
      */
     public function __construct(
-        DdeboerWriter $writer,
+        DdeboerDoctrineWriter $doctrineWriter,
+        DdeboerTableWriter $tableWriter,
         ValidatorInterface $validator,
         MappingStep $converter,
         ConstraintsInterface $constraints
     )
     {
-        $this->writer = $writer;
+        $this->doctrineWriter = $doctrineWriter;
+        $this->tableWriter = $tableWriter;
         $this->validator = $validator;
         $this->converter = $converter;
-        $this->helper = $constraints;
+        $this->constraints = $constraints;
     }
 
-    public function createImporter($fileFormat)
+    public function createImporter($fileFormat, $testMode)
     {
-        echo(123);die;
-
         switch ($fileFormat) {
             case self::EXT_CSV:
                 $importer = new CsvImporter();
@@ -68,23 +75,23 @@ class ImportFactory
             default:
                 throw new \Exception('Format not found');
         }
-
-        $this->setUp($importer);
+        $this->setUp($importer, $testMode);
         return $importer;
     }
 
     /**
      * @param Importer $importer
-     * @return $this
+     * @param $testMode
      */
-    protected function setUp(Importer $importer)
+    protected function setUp(Importer $importer, $testMode)
     {
-        $importer->setWriter($this->writer);
-        $importer->setConstraints($this->helper);
+        if ($testMode) {
+            $importer->setWriter($this->tableWriter);
+        } else {
+            $importer->setWriter($this->doctrineWriter);
+        }
+        $importer->setConstraints($this->constraints);
         $importer->setValidator($this->validator);
         $importer->setConverter($this->converter);
-
-        return $this;
-
     }
 }

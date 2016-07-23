@@ -1,14 +1,12 @@
 <?php
 namespace ImportBundle\Command;
 
-use ImportBundle\Factory\ImportFactory;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
-
+use Ddeboer\DataImport\Exception\ValidationException;
 class ImportCsvCommand extends ContainerAwareCommand
 {
     protected function configure()
@@ -31,23 +29,43 @@ class ImportCsvCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $now = date('d-m-Y(G:i:s)');
+        $start = date('d-m-Y (G:i:s)');
         $filePath = $input->getArgument('file_path');
-        $output->writeln("<info>Started: {$now}</info>");
+        $testMode = $input->getOption('test_run');
+        $output->writeln("<info>Started: {$start}</info>");
 
         //switching on import services...
         $importService = $this->getContainer()->get('import.service');
+        $importResult = $importService->startImport($filePath, $testMode);
+        $end = date('d-m-Y (G:i:s)');
+        $errors = $importResult->getExceptions();
+        $dateEnd = $importResult->getEndTime();
+        $fileParsingErrors = $importResult->getErrors();
+        $errorsAmt = $importResult->getCountErrors();
 
-//        try {
-//            $reader = ImportFactory::getReader($fileFormat, $filePath);
-//        } catch (FileNotFoundException $ex) {
-//            $output->writeln("<error>{$ex->getMessage()}</error>");
-//            return;
-//        }
+        if ($errorsAmt) {
+            $output->writeln("Import has been finished " . $end . " <error>Warning!!! Source Import File Contains Errors:</error>");
+            $output->writeln("<info>Total Errors Amount:" . $errorsAmt . "</info>");
 
-        $importService->import($filePath);
+            foreach ($errors as $error) {
+                if ($error instanceof ValidationException) {
+                    $violations = $error->getViolations();
+                    $lineNumber = $error->getLineNumber();
+                    $aErrors = [];
 
-        $output->writeln('---');
-        $output->writeln('Finished!!!');
+                    foreach ($violations as $violation) {
+                        $aErrors[] = $violation->getMessage();
+                    }
+
+                    $output->writeln('Errors: ' . implode(', ', $aErrors) . ' - row Nr\. ' . $lineNumber);
+                } else {
+                    $output->writeln('Error: ' . $error->getMessage());
+                }
+            }
+            $output->writeln('<info>' . $dateEnd . '</info> Validated items: ' . $importResult->getSuccessCount() . ', Failed items: ' . $errorsAmt);
+        } else {
+            $output->writeln($dateEnd . 'File data has been successfully imported!!!');
+        }
+
     }
 }

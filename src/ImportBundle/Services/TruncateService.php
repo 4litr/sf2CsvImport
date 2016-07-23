@@ -23,6 +23,9 @@ class TruncateService
     }
 
     public function truncateTable() {
-        $this->entityManager->clear('ImportBundle:ProductItem');
+        $this->entityManager->createQuery(
+            'DELETE ImportBundle:ProductItem p'
+        )
+            ->getResult();
     }
 }

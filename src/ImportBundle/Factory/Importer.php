@@ -8,14 +8,13 @@
 
 namespace ImportBundle\Factory;
 
-use Ddeboer\DataImport\Reader;
-use Ddeboer\DataImport\Writer;
+use Ddeboer\DataImport\Writer as Writer;
 use Ddeboer\DataImport\Step\MappingStep;
-use Ddeboer\DataImport\Result;
+use Ddeboer\DataImport\Result as DdeboerResult;
 use ImportBundle\Constraints\Constraints;
 use ImportBundle\Constraints\ConstraintsInterface;
-use ImportBundle\ImportResult;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use ImportBundle\ImportResult\ImportResult;
 
 abstract class Importer
 {
@@ -27,7 +26,7 @@ abstract class Importer
     /**
      * @var bool
      */
-    protected $testRun;
+    protected $testMode;
 
     /**
      * @var MappingStep
@@ -45,28 +44,11 @@ abstract class Importer
     protected $constraints;
 
     /**
-     * @var int
-     */
-    protected $cost;
-    /**
-     * @var int
-     */
-    protected $stock;
-
-    /**
      * @param Writer $writer
      */
     public function setWriter(Writer $writer)
     {
         $this->writer = $writer;
-    }
-
-    /**
-     * @param boolean $testOption
-     */
-    public function setTestOption($testOption)
-    {
-        $this->testOption = $testOption;
     }
 
     /**
@@ -107,7 +89,7 @@ abstract class Importer
     /**
      * @return Constraints
      */
-    public function getConstraintHelper()
+    public function getConstraints()
     {
         return $this->constraints;
     }
@@ -118,38 +100,6 @@ abstract class Importer
     public function setConstraints(ConstraintsInterface $constraints)
     {
         $this->constraints = $constraints;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCost()
-    {
-        return $this->cost;
-    }
-
-    /**
-     * @param int $cost
-     */
-    public function setCost($cost)
-    {
-        $this->cost = $cost;
-    }
-
-    /**
-     * @return int
-     */
-    public function getStock()
-    {
-        return $this->stock;
-    }
-
-    /**
-     * @param int $stock
-     */
-    public function setStock($stock)
-    {
-        $this->stock = $stock;
     }
 
     /**
@@ -168,13 +118,13 @@ abstract class Importer
     }
 
     /**
-     * @param $importResult
+     * @param DdeboerResult$importResult
      * @param $reader
-     * @return ImporterResult
+     * @return ImportResult
      */
     public function getResult($importResult, $reader)
     {
-        $result = new Result();
+        $result = new ImportResult();
         $result->setEndTime($importResult->getEndTime()->format('Y-m-d h:m:s'));
         $result->setExceptions($importResult->getExceptions());
         $result->setErrors($this->getParseErrors($reader));
