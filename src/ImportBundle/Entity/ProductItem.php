@@ -26,7 +26,6 @@ class ProductItem
 
     /**
      * @var string
-     *
      * @ORM\Column(name="strProductName", type="string", length=50, nullable=false)
      * @Assert\NotBlank(message="Product name is empty!")
      */
@@ -34,7 +33,6 @@ class ProductItem
 
     /**
      * @var string
-     *
      * @ORM\Column(name="strProductDesc", type="string", length=255, nullable=false)
      * @Assert\NotBlank(message="Product desc is empty!");
      */
@@ -42,7 +40,6 @@ class ProductItem
 
     /**
      * @var string
-     *
      * @ORM\Column(name="strProductCode", type="string", length=10, nullable=false)
      * @Assert\NotBlank(message="Product code is empty!")
      */
@@ -50,15 +47,12 @@ class ProductItem
 
     /**
      * @var \DateTime
-     *
      * @ORM\Column(name="dtmAdded", type="datetime", nullable=true)
      */
     private $dtmAdded;
 
     /**
      * @var \DateTime
-     * @Assert\Type(type="numeric", message="Property stock should be of type numeric")
-     * @Assert\NotBlank(message="Property stock is blank")
      * @ORM\Column(name="dtmDiscontinued", type="datetime", nullable=true)
      */
     private $dtmDiscontinued;
@@ -96,10 +90,6 @@ class ProductItem
      */
     private $stmTimestamp = 'CURRENT_TIMESTAMP';
 
-
-
-
-
     /**
      * Set strProductName
      *
@@ -129,11 +119,8 @@ class ProductItem
     }
 
     /**
-     * Set strProductCode
-     *
-     * @param string $strProductCode
-     *
-     * @return ProductItem
+     * @param $strProductCode
+     * @return $this
      */
     public function setStrProductCode($strProductCode)
     {
@@ -143,13 +130,10 @@ class ProductItem
     }
 
     /**
-     * Set stock
-     *
-     * @param integer $stock
-     *
-     * @return ProductItem
+     * @param $stock
+     * @return $this
      */
-    public function setIntStock($stock)
+    public function setStock($stock)
     {
         $this->stock = $stock;
 
@@ -157,13 +141,10 @@ class ProductItem
     }
 
     /**
-     * Set Cost
-     *
-     * @param float $cost
-     *
-     * @return ProductItem
+     * @param $cost
+     * @return $this
      */
-    public function setFltCost($cost)
+    public function setCost($cost)
     {
         $this->cost = $cost;
 

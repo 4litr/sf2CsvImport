@@ -42,8 +42,8 @@ class CsvImporter extends Importer implements ImporterInterface
         $this->converter->map('[Product Code]', '[strProductCode]')
             ->map('[Product Name]', '[strProductName]')
             ->map('[Product Description]', '[strProductDesc]')
-            ->map('[Stock]', '[intStock]')
-            ->map('[Cost in GBP]', '[fltCost]')
+            ->map('[Stock]', '[stock]')
+            ->map('[Cost in GBP]', '[cost]')
             ->map('[Discontinued]', '[dtmDiscontinued]');
 
         return $this;
@@ -70,7 +70,7 @@ class CsvImporter extends Importer implements ImporterInterface
 
         $filterStep->add((new Filters\UniqueProductFilter('strProductCode'))->getCallable(), 100);
         $filterStep->add((new Filters\ConditionsFilter('strProductCode', function ($data) {
-                return $data['fltCost'] >= Filters\ConditionsFilter::COST_MIN_TRESHOLD || $data['intStock'] >= Filters\ConditionsFilter::STOCK_MIN_TRESHOLD;
+                return $data['cost'] >= Filters\ConditionsFilter::COST_MIN_TRESHOLD || $data['stock'] >= Filters\ConditionsFilter::STOCK_MIN_TRESHOLD;
             }, 'Items cost is less than ' . Filters\ConditionsFilter::COST_MIN_TRESHOLD .' and stock value is less than ' . Filters\ConditionsFilter::STOCK_MIN_TRESHOLD))
                 ->getCallable(), 90);
 
@@ -93,9 +93,8 @@ class CsvImporter extends Importer implements ImporterInterface
 
         if ($this->writer instanceof Doctrine) {
             $this->writer->disableTruncate();
-            $progressWriter = new ConsoleProgressWriter(new ConsoleOutput() ,$reader);
+            $progressWriter = new ConsoleProgressWriter(new ConsoleOutput() ,$reader, 'normal', 5);
             $workflow->addWriter($progressWriter);
-            $workflow->addWriter($this->writer);
 
             //Field names mappings to csv headers names...
             $workflow->addStep($this->getConverter());

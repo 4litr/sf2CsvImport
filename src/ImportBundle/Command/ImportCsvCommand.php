@@ -32,7 +32,11 @@ class ImportCsvCommand extends ContainerAwareCommand
         $start = date('d-m-Y (G:i:s)');
         $filePath = $input->getArgument('file_path');
         $testMode = $input->getOption('test_run');
-        $output->writeln("<info>Started: {$start}</info>");
+        if (!$testMode) {
+            $output->writeln("<info>Started: {$start}</info>");
+        } else {
+            $output->writeln("<fg=red>[TEST_MODE_ENABLED]</><info>Started: {$start}</info>");
+        }
 
         //switching on import services...
         $importService = $this->getContainer()->get('import.service');
@@ -64,7 +68,7 @@ class ImportCsvCommand extends ContainerAwareCommand
             }
             $output->writeln('<info>' . $dateEnd . '</info> Validated items: ' . $importResult->getSuccessCount() . ', Failed items: ' . $errorsAmt);
         } else {
-            $output->writeln($dateEnd . 'File data has been successfully imported!!!');
+            $output->writeln($dateEnd . ' <fg=black;bg=green>File data has been successfully imported!!!</>');
         }
 
     }
