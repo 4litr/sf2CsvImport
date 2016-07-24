@@ -13,6 +13,7 @@ use Ddeboer\DataImport\Writer\DoctrineWriter as DdeboerDoctrineWriter;
 use Ddeboer\DataImport\Writer\ConsoleTableWriter as DdeboerTableWriter;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use ImportBundle\Constraints\ConstraintsInterface;
+use Ddeboer\DataImport\Exception\ReaderException;
 
 class ImportFactory
 {
@@ -73,7 +74,7 @@ class ImportFactory
                 $importer = new CsvImporter();
                 break;
             default:
-                throw new \Exception('Format not found');
+                throw new ReaderException("{$fileFormat} format not found");
         }
         $this->setUp($importer, $testMode);
         return $importer;

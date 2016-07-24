@@ -9,11 +9,11 @@ use Ddeboer\DataImport\Step\MappingStep;
 use Ddeboer\DataImport\Workflow\StepAggregator;
 use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
 use Doctrine\ORM\Mapping\Entity;
+use ImportBundle\Entity\ProductItem;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use ImportBundle\ImportResult\ImportResult;
 use ImportBundle\Filters as Filters;
-
-
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 
 class CsvImporter extends Importer implements ImporterInterface
@@ -24,7 +24,11 @@ class CsvImporter extends Importer implements ImporterInterface
      */
     public function getReader($file)
     {
-        $file = new \SplFileObject($file);
+        try {
+            $file = new \SplFileObject($file);
+        } catch (\Exception $ex ) {
+            throw new FileNotFoundException();
+        }
         $reader = new Reader\CsvReader($file);
 
         //ignores csv headers row
@@ -39,12 +43,12 @@ class CsvImporter extends Importer implements ImporterInterface
     public function setConverter(MappingStep $converter)
     {
         $this->converter = $converter;
-        $this->converter->map('[Product Code]', '[strProductCode]')
-            ->map('[Product Name]', '[strProductName]')
-            ->map('[Product Description]', '[strProductDesc]')
+        $this->converter->map('[Product Code]', '[productCode]')
+            ->map('[Product Name]', '[productName]')
+            ->map('[Product Description]', '[productDesc]')
             ->map('[Stock]', '[stock]')
             ->map('[Cost in GBP]', '[cost]')
-            ->map('[Discontinued]', '[dtmDiscontinued]');
+            ->map('[Discontinued]', '[dateDiscontinued]');
 
         return $this;
     }
@@ -68,14 +72,14 @@ class CsvImporter extends Importer implements ImporterInterface
     {
         $filterStep = new FilterStep();
 
-        $filterStep->add((new Filters\UniqueProductFilter('strProductCode'))->getCallable(), 100);
-        $filterStep->add((new Filters\ConditionsFilter('strProductCode', function ($data) {
+        $filterStep->add((new Filters\UniqueProductFilter('productCode'))->getCallable(), 100);
+        $filterStep->add((new Filters\ConditionsFilter('productCode', function ($data) {
                 return $data['cost'] >= Filters\ConditionsFilter::COST_MIN_TRESHOLD || $data['stock'] >= Filters\ConditionsFilter::STOCK_MIN_TRESHOLD;
             }, 'Items cost is less than ' . Filters\ConditionsFilter::COST_MIN_TRESHOLD .' and stock value is less than ' . Filters\ConditionsFilter::STOCK_MIN_TRESHOLD))
                 ->getCallable(), 90);
 
         $filterStep->add(
-            (new Filters\AssertsFilter($this->validator, $this->constraints, Entity::class))
+            (new Filters\AssertsFilter($this->validator, $this->constraints, ProductItem::class))
                 ->getCallable(), 80
         );
 
@@ -92,7 +96,7 @@ class CsvImporter extends Importer implements ImporterInterface
         $workflow->setSkipItemOnFailure(true);
 
         if ($this->writer instanceof Doctrine) {
-            $this->writer->disableTruncate();
+            //$this->writer->disableTruncate();
             $progressWriter = new ConsoleProgressWriter(new ConsoleOutput() ,$reader, 'normal', 5);
             $workflow->addWriter($progressWriter);
 

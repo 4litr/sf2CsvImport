@@ -12,7 +12,7 @@ use \Ddeboer\DataImport\Filter\ValidatorFilter as DdeboerValidator;
 use ImportBundle\Constraints\ConstraintsInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class AssertsFilter extends Filter
+class AssertsFilter
 {
     /**
      * @var ValidatorInterface
@@ -56,7 +56,6 @@ class AssertsFilter extends Filter
 
         $validator->throwExceptions();
         $validator->setStrict(false);
-
         return $validator;
     }
 }

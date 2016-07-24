@@ -26,36 +26,36 @@ class ProductItem
 
     /**
      * @var string
+     * @ORM\Column(name="strProductCode", type="string", length=10, nullable=false)
+     * @Assert\NotBlank(message="Product code is empty!")
+     */
+    private $productCode;
+
+    /**
+     * @var string
      * @ORM\Column(name="strProductName", type="string", length=50, nullable=false)
      * @Assert\NotBlank(message="Product name is empty!")
      */
-    private $strProductName;
+    private $productName;
 
     /**
      * @var string
      * @ORM\Column(name="strProductDesc", type="string", length=255, nullable=false)
      * @Assert\NotBlank(message="Product desc is empty!");
      */
-    private $strProductDesc;
-
-    /**
-     * @var string
-     * @ORM\Column(name="strProductCode", type="string", length=10, nullable=false)
-     * @Assert\NotBlank(message="Product code is empty!")
-     */
-    private $strProductCode;
+    private $productDesc;
 
     /**
      * @var \DateTime
      * @ORM\Column(name="dtmAdded", type="datetime", nullable=true)
      */
-    private $dtmAdded;
+    private $dateAdded;
 
     /**
      * @var \DateTime
      * @ORM\Column(name="dtmDiscontinued", type="datetime", nullable=true)
      */
-    private $dtmDiscontinued;
+    private $dateDiscontinued;
 
     /**
      * @var int
@@ -73,59 +73,44 @@ class ProductItem
      *      min = 0,
      *      max = 1000,
      *      minMessage = "Item cost must be at least {{ limit }}",
-     *      maxMessage = "Item cost cannot be taller than {{ limit }}")
+     *      maxMessage = "Item cost cannot be higher than {{ limit }}")
      * @ORM\Column(name="fltCost", type="float", options={"unsigned"=true})
      */
     private $cost;
 
     /**
-     * @var bool
-     */
-    private $discontinued;
-
-    /**
      * @var \DateTime
-     *
      * @ORM\Column(name="stmTimestamp", type="datetime", nullable=false)
      */
-    private $stmTimestamp = 'CURRENT_TIMESTAMP';
+    private $timestamp = 'CURRENT_TIMESTAMP';
 
     /**
-     * Set strProductName
-     *
-     * @param string $strProductName
-     *
+     * @param string $productName
      * @return ProductItem
      */
-    public function setStrProductName($strProductName)
+    public function setProductName($productName)
     {
-        $this->strProductName = $strProductName;
-
+        $this->productName = $productName;
         return $this;
     }
 
     /**
-     * Set strProductDesc
-     *
-     * @param string $strProductDesc
-     *
+     * @param string $productDesc
      * @return ProductItem
      */
-    public function setStrProductDesc($strProductDesc)
+    public function setProductDesc($productDesc)
     {
-        $this->strProductDesc = $strProductDesc;
-
+        $this->productDesc = $productDesc;
         return $this;
     }
 
     /**
-     * @param $strProductCode
+     * @param $productCode
      * @return $this
      */
-    public function setStrProductCode($strProductCode)
+    public function setProductCode($productCode)
     {
-        $this->strProductCode = $strProductCode;
-
+        $this->productCode = $productCode;
         return $this;
     }
 
@@ -136,7 +121,6 @@ class ProductItem
     public function setStock($stock)
     {
         $this->stock = $stock;
-
         return $this;
     }
 
@@ -147,29 +131,21 @@ class ProductItem
     public function setCost($cost)
     {
         $this->cost = $cost;
-
         return $this;
     }
 
     /**
-     * @return $this
+     * @ORM\PrePersist
      */
-    public function setDtmAdded()
+    public function setDateAdded()
     {
-        $this->dtmAdded = new \DateTime();
-
+        $this->dateAdded = new \DateTime();
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    public function setDtmDiscontinued()
+    public function setDateDiscontinued($isDiscontinued)
     {
-        if ($this->discontinued) {
-            $this->dtmDiscontinued = new \DateTime();
-        }
-
+        $this->dateDiscontinued = ($isDiscontinued === 'yes') ? new \DateTime() : null;
         return $this;
     }
 
@@ -177,9 +153,9 @@ class ProductItem
      * @ORM\PrePersist
      * @ORM\PreUpdate
      */
-    public function setStmTimestamp()
+    public function setTimestamp()
     {
-        $this->stmTimestamp = new \DateTime();
+        $this->timestamp = new \DateTime();
         return $this;
     }
 }

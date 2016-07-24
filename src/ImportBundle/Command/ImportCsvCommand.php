@@ -1,12 +1,15 @@
 <?php
 namespace ImportBundle\Command;
 
+use Ddeboer\DataImport\Exception\ReaderException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ddeboer\DataImport\Exception\ValidationException;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+
 class ImportCsvCommand extends ContainerAwareCommand
 {
     protected function configure()
@@ -32,15 +35,22 @@ class ImportCsvCommand extends ContainerAwareCommand
         $start = date('d-m-Y (G:i:s)');
         $filePath = $input->getArgument('file_path');
         $testMode = $input->getOption('test_run');
+        //switching on import services...
+        $importService = $this->getContainer()->get('import.service');
+        try {
+            $importResult = $importService->startImport($filePath, $testMode);
+        } catch (ReaderException $ex) {
+            $output->writeln("<fg=red;bg=black>" . $ex->getMessage() . "</>");
+            return;
+        } catch (FileNotFoundException $ex) {
+            $output->writeln("<fg=red;bg=black>". $ex->getMessage() ."</>");
+            return;
+        }
         if (!$testMode) {
             $output->writeln("<info>Started: {$start}</info>");
         } else {
             $output->writeln("<fg=red>[TEST_MODE_ENABLED]</><info>Started: {$start}</info>");
         }
-
-        //switching on import services...
-        $importService = $this->getContainer()->get('import.service');
-        $importResult = $importService->startImport($filePath, $testMode);
         $end = date('d-m-Y (G:i:s)');
         $errors = $importResult->getExceptions();
         $dateEnd = $importResult->getEndTime();
@@ -48,6 +58,7 @@ class ImportCsvCommand extends ContainerAwareCommand
         $errorsAmt = $importResult->getCountErrors();
 
         if ($errorsAmt) {
+            $output->writeln("----");
             $output->writeln("Import has been finished " . $end . " <error>Warning!!! Source Import File Contains Errors:</error>");
             $output->writeln("<info>Total Errors Amount:" . $errorsAmt . "</info>");
 
@@ -61,14 +72,19 @@ class ImportCsvCommand extends ContainerAwareCommand
                         $aErrors[] = $violation->getMessage();
                     }
 
-                    $output->writeln('Errors: ' . implode(', ', $aErrors) . ' - row Nr\. ' . $lineNumber);
+                    $output->writeln('Errors: ' . implode(', ', $aErrors) . ' - row №. ' . $lineNumber);
                 } else {
                     $output->writeln('Error: ' . $error->getMessage());
                 }
             }
             $output->writeln('<info>' . $dateEnd . '</info> Validated items: ' . $importResult->getSuccessCount() . ', Failed items: ' . $errorsAmt);
         } else {
-            $output->writeln($dateEnd . ' <fg=black;bg=green>File data has been successfully imported!!!</>');
+            if($testMode) {
+                $output->writeln($dateEnd . ' <fg=black;bg=green>File data has been successfully parsed!!!</>');
+            } else {
+                $output->writeln($dateEnd . ' <fg=black;bg=green>File data has been successfully imported!!!</>');
+            }
+
         }
 
     }

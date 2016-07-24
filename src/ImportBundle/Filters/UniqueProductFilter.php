@@ -8,7 +8,7 @@
 
 namespace ImportBundle\Filters;
 
-use Ddeboer\DataImport\Exception\WriterException;
+use Symfony\Component\Config\Definition\Exception\DuplicateKeyException;
 
 class UniqueProductFilter extends Filter
 {
@@ -23,8 +23,10 @@ class UniqueProductFilter extends Filter
             $this->checkValue($data);
 
             if ($this->isExists($data)) {
-                throw new WriterException(
+                //TODO: check if item already exists in database..
+                throw new DuplicateKeyException(
                     sprintf('Duplication product code - %s', $this->getValue($data))
+
                 );
             } else {
                 $this->addValue($data);

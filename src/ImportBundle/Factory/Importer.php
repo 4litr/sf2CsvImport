@@ -49,6 +49,7 @@ abstract class Importer
     public function setWriter(Writer $writer)
     {
         $this->writer = $writer;
+        return $this;
     }
 
     /**
@@ -66,7 +67,6 @@ abstract class Importer
     public function setConverter(MappingStep $converter)
     {
         $this->converter = $converter;
-
         return $this;
     }
 
@@ -96,10 +96,12 @@ abstract class Importer
 
     /**
      * @param ConstraintsInterface $constraints
+     * @return $this
      */
     public function setConstraints(ConstraintsInterface $constraints)
     {
         $this->constraints = $constraints;
+        return $this;
     }
 
     /**
