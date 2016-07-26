@@ -1,5 +1,6 @@
 parameters:
     product_item_entity: 'ImportBundle:ProductItem'
+    lookup_field: 'productCode'
 
 services:
     ddboer.dataimport.doctrine_writer:
@@ -7,17 +8,7 @@ services:
         arguments:
             - '@doctrine.orm.default_entity_manager'
             - '%product_item_entity%'
-    console.output:
-        class: Symfony\Component\Console\Output\ConsoleOutput
-    ddeboer.table:
-        class: Symfony\Component\Console\Helper\Table
-        arguments:
-            - '@console.output'
-    ddboer.dataimport.table_writer:
-        class: Ddeboer\DataImport\Writer\ConsoleTableWriter
-        arguments:
-            - '@console.output'
-            - '@ddeboer.table'
+            - '%lookup_field%'
     ddboer.mapping.converter:
         class: Ddeboer\DataImport\Step\MappingStep
     import.constraints:
@@ -28,7 +19,6 @@ services:
         class: ImportBundle\Factory\ImportFactory
         arguments:
             - '@ddboer.dataimport.doctrine_writer'
-            - '@ddboer.dataimport.table_writer'
             - '@validator'
             - '@ddboer.mapping.converter'
             - '@import.constraints'
@@ -42,3 +32,4 @@ services:
         class: ImportBundle\Services\TruncateService
         arguments:
             - '@doctrine.orm.default_entity_manager'
+            - '%product_item_entity%'

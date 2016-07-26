@@ -17,15 +17,18 @@ class TruncateService
      */
     protected $entityManager;
 
-    public function __construct(EntityManager $entityManager)
+    protected $class;
+
+    public function __construct(EntityManager $entityManager, $class)
     {
         $this->entityManager = $entityManager;
+        $this->class = $class;
     }
 
     public function truncateTable() {
-        $this->entityManager->createQuery(
-            'DELETE ImportBundle:ProductItem p'
-        )
-            ->getResult();
+        $tableName = $this->entityManager->getClassMetadata($this->class)->table['name'];
+        $connection = $this->entityManager->getConnection();
+        $query = $connection->getDatabasePlatform()->getTruncateTableSQL($tableName, true);
+        $connection->executeQuery($query);
     }
 }

@@ -8,6 +8,7 @@
 
 namespace ImportBundle\Factory;
 
+use Ddeboer\DataImport\Exception\ReaderException;
 use Ddeboer\DataImport\Writer as Writer;
 use Ddeboer\DataImport\Step\MappingStep;
 use Ddeboer\DataImport\Result as DdeboerResult;
@@ -26,7 +27,7 @@ abstract class Importer
     /**
      * @var bool
      */
-    protected $testMode;
+    protected $testRun;
 
     /**
      * @var MappingStep
@@ -45,19 +46,30 @@ abstract class Importer
 
     /**
      * @param Writer $writer
+     * @return $this
      */
     public function setWriter(Writer $writer)
     {
-        $this->writer = $writer;
+        $this->writer = $this->testRun ? null : $writer;
         return $this;
     }
 
     /**
-     * @return MappingStep
+     * @return Writer
      */
-    public function getConverter()
+    public function getWriter()
     {
-        return $this->converter;
+        return $this->writer;
+    }
+
+    /**
+     * @param $testRun bool
+     * @return $this
+     */
+    public function setTestMode($testRun)
+    {
+        $this->testRun = $testRun;
+        return $this;
     }
 
     /**
@@ -71,11 +83,11 @@ abstract class Importer
     }
 
     /**
-     * @return ValidatorInterface
+     * @return MappingStep
      */
-    public function getValidator()
+    public function getConverter()
     {
-        return $this->validator;
+        return $this->converter;
     }
 
     /**
@@ -84,6 +96,14 @@ abstract class Importer
     public function setValidator(ValidatorInterface $validator)
     {
         $this->validator = $validator;
+    }
+
+    /**
+     * @return ValidatorInterface
+     */
+    public function getValidator()
+    {
+        return $this->validator;
     }
 
     /**
@@ -120,12 +140,15 @@ abstract class Importer
     }
 
     /**
-     * @param DdeboerResult$importResult
+     * @param DdeboerResult $importResult
      * @param $reader
      * @return ImportResult
      */
     public function getResult($importResult, $reader)
     {
+        if ($importResult->getTotalProcessedCount() == 0) {
+            throw new ReaderException('File is empty');
+        }
         $result = new ImportResult();
         $result->setEndTime($importResult->getEndTime()->format('Y-m-d h:m:s'));
         $result->setExceptions($importResult->getExceptions());

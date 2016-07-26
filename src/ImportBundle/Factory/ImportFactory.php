@@ -9,8 +9,7 @@
 namespace ImportBundle\Factory;
 
 use Ddeboer\DataImport\Step\MappingStep;
-use Ddeboer\DataImport\Writer\DoctrineWriter as DdeboerDoctrineWriter;
-use Ddeboer\DataImport\Writer\ConsoleTableWriter as DdeboerTableWriter;
+use Ddeboer\DataImport\Writer as Writer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use ImportBundle\Constraints\ConstraintsInterface;
 use Ddeboer\DataImport\Exception\ReaderException;
@@ -20,14 +19,9 @@ class ImportFactory
     const EXT_CSV = 'csv';
 
     /**
-     * @var DdeboerDoctrineWriter
+     * @var Writer
      */
-    protected $doctrineWriter;
-
-    /**
-     * @var DdeboerTableWriter
-     */
-    protected $tableWriter;
+    protected $writer;
 
     /**
      * @var ValidatorInterface
@@ -46,37 +40,34 @@ class ImportFactory
 
     /**
      * ImportFactory constructor.
-     * @param DdeboerDoctrineWriter $doctrineWriter
-     * @param DdeboerTableWriter $tableWriter
+     * @param Writer $writer
      * @param ValidatorInterface $validator
      * @param MappingStep $converter
      * @param ConstraintsInterface $constraints
      */
     public function __construct(
-        DdeboerDoctrineWriter $doctrineWriter,
-        DdeboerTableWriter $tableWriter,
+        Writer $writer,
         ValidatorInterface $validator,
         MappingStep $converter,
         ConstraintsInterface $constraints
     )
     {
-        $this->doctrineWriter = $doctrineWriter;
-        $this->tableWriter = $tableWriter;
+        $this->writer = $writer;
         $this->validator = $validator;
         $this->converter = $converter;
         $this->constraints = $constraints;
     }
 
-    public function createImporter($fileFormat, $testMode)
+    public function createImporter($fileFormat, $testRun)
     {
         switch ($fileFormat) {
             case self::EXT_CSV:
                 $importer = new CsvImporter();
                 break;
             default:
-                throw new ReaderException("{$fileFormat} format not found");
+                throw new ReaderException($fileFormat.' format not found');
         }
-        $this->setUp($importer, $testMode);
+        $this->setUp($importer, $testRun);
         return $importer;
     }
 
@@ -86,11 +77,8 @@ class ImportFactory
      */
     protected function setUp(Importer $importer, $testMode)
     {
-        if ($testMode) {
-            $importer->setWriter($this->tableWriter);
-        } else {
-            $importer->setWriter($this->doctrineWriter);
-        }
+        $importer->setTestMode($testMode);
+        $importer->setWriter($this->writer);
         $importer->setConstraints($this->constraints);
         $importer->setValidator($this->validator);
         $importer->setConverter($this->converter);

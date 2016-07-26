@@ -8,21 +8,12 @@
  */
 namespace ImportBundle\Services;
 
-use Ddeboer\DataImport\Step\FilterStep;
-use Ddeboer\DataImport\Workflow\StepAggregator;
 use Doctrine\ORM\EntityManager; //for truncate table service
 use Ddeboer\DataImport\Reader as Reader;
-use Ddeboer\DataImport\Writer\ConsoleTableWriter;
-use ImportBundle\Factory\ImporterInterface;
 use ImportBundle\Factory\ImportFactory;
-use Symfony\Component\Console\Helper\Table;
-use Ddeboer\DataImport\Writer\DoctrineWriter;
 use Ddeboer\DataImport\Filter;
-use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use \Ddeboer\DataImport\Filter\ValidatorFilter;
 use Symfony\Component\Validator\Constraints as Assert;
-
 
 class ImportService
 {
@@ -44,6 +35,7 @@ class ImportService
      * @param ImportFactory $factory
      * @param EntityManager $entityManager
      * @param ValidatorInterface $validator
+     * @param bool|false $testRun
      */
     public function __construct(
         ImportFactory $factory,
@@ -58,12 +50,12 @@ class ImportService
 
     /**
      * @param $filePath
-     * @param $testMode
+     * @param $testRun
      * @return \ImportBundle\ImportResult\ImportResult
      */
-    public function startImport($filePath, $testMode) {
+    public function startImport($filePath, $testRun) {
         $fileExtension = $this->getFileExtension($filePath);
-        $importer = $this->factory->createImporter($fileExtension, $testMode);
+        $importer = $this->factory->createImporter($fileExtension, $testRun);
         $result = $importer->import($filePath);
 
         return $result;

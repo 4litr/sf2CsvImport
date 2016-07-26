@@ -3,14 +3,12 @@
 namespace ImportBundle\Factory;
 
 use Ddeboer\DataImport\Reader;
+use Ddeboer\DataImport\Writer;
 use Ddeboer\DataImport\Writer\DoctrineWriter as Doctrine;
 use Ddeboer\DataImport\Step\FilterStep;
 use Ddeboer\DataImport\Step\MappingStep;
 use Ddeboer\DataImport\Workflow\StepAggregator;
-use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
-use Doctrine\ORM\Mapping\Entity;
 use ImportBundle\Entity\ProductItem;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use ImportBundle\ImportResult\ImportResult;
 use ImportBundle\Filters as Filters;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
@@ -71,16 +69,18 @@ class CsvImporter extends Importer implements ImporterInterface
     protected function getFilter()
     {
         $filterStep = new FilterStep();
-
-        $filterStep->add((new Filters\UniqueProductFilter('productCode'))->getCallable(), 100);
-        $filterStep->add((new Filters\ConditionsFilter('productCode', function ($data) {
-                return $data['cost'] >= Filters\ConditionsFilter::COST_MIN_TRESHOLD || $data['stock'] >= Filters\ConditionsFilter::STOCK_MIN_TRESHOLD;
-            }, 'Items cost is less than ' . Filters\ConditionsFilter::COST_MIN_TRESHOLD .' and stock value is less than ' . Filters\ConditionsFilter::STOCK_MIN_TRESHOLD))
-                ->getCallable(), 90);
+        $message = 'Items cost is less than ' . Filters\ConditionsFilter::COST_MIN_TRESHOLD .' and stock value is less than ' . Filters\ConditionsFilter::STOCK_MIN_TRESHOLD.' for productCode[[productCode]]';
+        $filterStep->add((new Filters\UniqueProductFilter('productCode'))->getCallable(), 90);
+        $filterStep->add(
+            (new Filters\ConditionsFilter('productCode',
+                function ($data) {
+                    return $data['cost'] >= Filters\ConditionsFilter::COST_MIN_TRESHOLD || $data['stock'] >= Filters\ConditionsFilter::STOCK_MIN_TRESHOLD;
+                }, $message ))
+                ->getCallable(), 80);
 
         $filterStep->add(
             (new Filters\AssertsFilter($this->validator, $this->constraints, ProductItem::class))
-                ->getCallable(), 80
+                ->getCallable(), 70
         );
 
         return $filterStep;
@@ -95,16 +95,16 @@ class CsvImporter extends Importer implements ImporterInterface
         $workflow = new StepAggregator($reader);
         $workflow->setSkipItemOnFailure(true);
 
-        if ($this->writer instanceof Doctrine) {
-            //$this->writer->disableTruncate();
-            $progressWriter = new ConsoleProgressWriter(new ConsoleOutput() ,$reader, 'normal', 5);
-            $workflow->addWriter($progressWriter);
+        //switching on Field names mappings to csv headers names...
+        $workflow->addStep($this->getConverter(), 100);
+        $workflow->addStep($this->getFilter(), 90);
 
-            //Field names mappings to csv headers names...
-            $workflow->addStep($this->getConverter());
-            $workflow->addStep($this->getFilter());
+        if ($this->writer instanceof Doctrine) {
+            $this->writer->disableTruncate();
         }
-        $workflow->addWriter($this->writer);
+        if ($this->writer instanceof Writer) {
+            $workflow->addWriter($this->writer);
+        }
 
         return $workflow;
     }

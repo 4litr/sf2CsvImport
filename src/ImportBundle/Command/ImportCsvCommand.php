@@ -34,52 +34,65 @@ class ImportCsvCommand extends ContainerAwareCommand
     {
         $start = date('d-m-Y (G:i:s)');
         $filePath = $input->getArgument('file_path');
-        $testMode = $input->getOption('test_run');
-        //switching on import services...
+        $testRun = $input->getOption('test_run');
+        if (!$testRun) {
+            $output->writeln('');
+            $output->writeln('<info>Started: ' . $start . '</info>');
+        } else {
+            $output->writeln('<fg=red>[TEST_MODE_ENABLED]</><info>Started: ' . $start . '</info>');
+        }
+
+        //switching on import service...
         $importService = $this->getContainer()->get('import.service');
+
         try {
-            $importResult = $importService->startImport($filePath, $testMode);
+            $importResult = $importService->startImport($filePath, $testRun);
         } catch (ReaderException $ex) {
-            $output->writeln("<fg=red;bg=black>" . $ex->getMessage() . "</>");
+            $output->writeln('');
+            $output->writeln('<fg=red;bg=black>' . $ex->getMessage() . '</>');
             return;
         } catch (FileNotFoundException $ex) {
-            $output->writeln("<fg=red;bg=black>". $ex->getMessage() ."</>");
+            $output->writeln('');
+            $output->writeln('<fg=red;bg=black>'. $ex->getMessage() .'</>');
             return;
         }
-        if (!$testMode) {
-            $output->writeln("<info>Started: {$start}</info>");
-        } else {
-            $output->writeln("<fg=red>[TEST_MODE_ENABLED]</><info>Started: {$start}</info>");
-        }
+
         $end = date('d-m-Y (G:i:s)');
         $errors = $importResult->getExceptions();
         $dateEnd = $importResult->getEndTime();
         $fileParsingErrors = $importResult->getErrors();
         $errorsAmt = $importResult->getCountErrors();
+        $output->writeln('');
+        $output->writeln('Import has been finished ' . $end);
 
         if ($errorsAmt) {
-            $output->writeln("----");
-            $output->writeln("Import has been finished " . $end . " <error>Warning!!! Source Import File Contains Errors:</error>");
-            $output->writeln("<info>Total Errors Amount:" . $errorsAmt . "</info>");
+            $output->writeln('');
+            $output->writeln('<fg=red;bg=white>Warning!!! Source Import File Contains Errors:</>');
+            $output->writeln('Total Errors Amount:<error>' . $errorsAmt . '</error>');
 
             foreach ($errors as $error) {
                 if ($error instanceof ValidationException) {
                     $violations = $error->getViolations();
-                    $lineNumber = $error->getLineNumber();
                     $aErrors = [];
 
                     foreach ($violations as $violation) {
                         $aErrors[] = $violation->getMessage();
+                        $productRoot = $violation->getRoot();
                     }
 
-                    $output->writeln('Errors: ' . implode(', ', $aErrors) . ' - row №. ' . $lineNumber);
+                    $output->writeln('<error>Errors: ' . implode(', ', $aErrors) . ' - productCode:[' . $productRoot['productCode'] . ']</error>');
                 } else {
-                    $output->writeln('Error: ' . $error->getMessage());
+                    $output->writeln('<error>Error: ' . $error->getMessage() . '</error>');
                 }
             }
-            $output->writeln('<info>' . $dateEnd . '</info> Validated items: ' . $importResult->getSuccessCount() . ', Failed items: ' . $errorsAmt);
+            if ($fileParsingErrors) {
+                foreach ($fileParsingErrors as $parseError) {
+                    $output->writeln('<error>Parse Error line: ' . $parseError . '</error>');
+                }
+            }
+                $output->writeln('<fg=red;bg=white>' . $dateEnd . ' Validated items: ' . $importResult->getSuccessCount() . ', Failed items: ' . $errorsAmt . '</>');
         } else {
-            if($testMode) {
+            if($testRun) {
                 $output->writeln($dateEnd . ' <fg=black;bg=green>File data has been successfully parsed!!!</>');
             } else {
                 $output->writeln($dateEnd . ' <fg=black;bg=green>File data has been successfully imported!!!</>');

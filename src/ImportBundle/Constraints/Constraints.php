@@ -27,7 +27,6 @@ class Constraints implements ConstraintsInterface
     }
 
     /**
-     * Gets constraints array from entities asserts...
      * @param $entity
      * @return array
      */

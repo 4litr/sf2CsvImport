@@ -7,7 +7,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-
 class TruncateProductsTableCommand extends ContainerAwareCommand
 {
     protected function configure()
@@ -19,14 +18,12 @@ class TruncateProductsTableCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('This will truncate your product items table. Process anyway?<info>[y/n]</info>>', false);
+        $question = new ConfirmationQuestion('This will truncate your product items table. Process anyway?<fg=yellow>[y/n]</>', false);
         if (!$helper->ask($input, $output, $question)) {
             return;
         }
 
-        //TODO: how to pass param
         $output->write('truncating products table...');
         $services = $this->getContainer()->get('truncate.service');
         $services->truncateTable();

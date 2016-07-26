@@ -48,7 +48,7 @@ class ConditionsFilter extends Filter
 
             if (!$this->isValid($data)) {
                 throw new WriterException(
-                    str_replace('[name]', $this->getValue($data), $this->message)
+                    str_replace('[productCode]', $this->getValue($data), $this->message)
                 );
             } else {
                 $this->addValue($data);
