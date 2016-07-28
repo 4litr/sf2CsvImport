@@ -35,7 +35,6 @@ class ImportService
      * @param ImportFactory $factory
      * @param EntityManager $entityManager
      * @param ValidatorInterface $validator
-     * @param bool|false $testRun
      */
     public function __construct(
         ImportFactory $factory,
@@ -54,19 +53,10 @@ class ImportService
      * @return \ImportBundle\ImportResult\ImportResult
      */
     public function startImport($filePath, $testRun) {
-        $fileExtension = $this->getFileExtension($filePath);
+        $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
         $importer = $this->factory->createImporter($fileExtension, $testRun);
         $result = $importer->import($filePath);
 
         return $result;
-    }
-
-    /**
-     * @param string $filePath
-     * @return string
-     */
-    protected function getFileExtension($filePath)
-    {
-        return substr(strrchr($filePath, '.'), 1);
     }
 }

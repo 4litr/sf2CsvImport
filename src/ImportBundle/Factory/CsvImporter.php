@@ -69,7 +69,7 @@ class CsvImporter extends Importer implements ImporterInterface
     protected function getFilter()
     {
         $filterStep = new FilterStep();
-        $message = 'Items cost is less than ' . Filters\ConditionsFilter::COST_MIN_TRESHOLD .' and stock value is less than ' . Filters\ConditionsFilter::STOCK_MIN_TRESHOLD.' for productCode[[productCode]]';
+        $message = 'Items cost is less than ' . Filters\ConditionsFilter::COST_MIN_TRESHOLD . ' and stock value is less than ' . Filters\ConditionsFilter::STOCK_MIN_TRESHOLD . ' for productCode[[productCode]]';
         $filterStep->add((new Filters\UniqueProductFilter('productCode'))->getCallable(), 90);
         $filterStep->add(
             (new Filters\ConditionsFilter('productCode',
