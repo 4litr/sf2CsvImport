@@ -24,6 +24,7 @@ class TruncateProductsTableCommand extends ContainerAwareCommand
             false
         );
         if (!$helper->ask($input, $output, $question)) {
+            $output->writeln('<info>Truncate has been cancelled...</info>');
             return;
         }
 

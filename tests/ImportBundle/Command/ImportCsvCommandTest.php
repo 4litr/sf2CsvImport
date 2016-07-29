@@ -78,5 +78,4 @@ class ImportCsvCommandTest extends KernelTestCase
 
         $this->assertRegexp('/Validated items/', $this->commandTester->getDisplay());
     }
-
 }
