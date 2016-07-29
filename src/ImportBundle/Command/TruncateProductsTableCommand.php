@@ -19,7 +19,10 @@ class TruncateProductsTableCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('This will truncate your product items table. Process anyway?<fg=yellow>[y/n]</>', false);
+        $question = new ConfirmationQuestion(
+            'This will truncate your product items table. Process anyway?<fg=yellow>[y/n]</>',
+            false
+        );
         if (!$helper->ask($input, $output, $question)) {
             return;
         }

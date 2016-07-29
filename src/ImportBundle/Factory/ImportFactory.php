@@ -50,8 +50,7 @@ class ImportFactory
         ValidatorInterface $validator,
         MappingStep $converter,
         ConstraintsInterface $constraints
-    )
-    {
+    ) {
         $this->writer = $writer;
         $this->validator = $validator;
         $this->converter = $converter;

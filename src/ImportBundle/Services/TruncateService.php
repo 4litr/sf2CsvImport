@@ -7,7 +7,6 @@
  */
 namespace ImportBundle\Services;
 
-
 use Doctrine\ORM\EntityManager;
 
 class TruncateService
@@ -25,7 +24,8 @@ class TruncateService
         $this->class = $class;
     }
 
-    public function truncateTable() {
+    public function truncateTable()
+    {
         $tableName = $this->entityManager->getClassMetadata($this->class)->table['name'];
         $connection = $this->entityManager->getConnection();
         $query = $connection->getDatabasePlatform()->getTruncateTableSQL($tableName, true);

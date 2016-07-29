@@ -9,6 +9,7 @@
 namespace ImportBundle\Factory;
 
 use Ddeboer\DataImport\Exception\ReaderException;
+use Ddeboer\DataImport\Reader\CsvReader;
 use Ddeboer\DataImport\Writer as Writer;
 use Ddeboer\DataImport\Step\MappingStep;
 use Ddeboer\DataImport\Result as DdeboerResult;
@@ -125,7 +126,7 @@ abstract class Importer
     }
 
     /**
-     * @param $reader
+     * @param $reader CsvReader
      * @return array
      */
     protected function getParseErrors($reader)

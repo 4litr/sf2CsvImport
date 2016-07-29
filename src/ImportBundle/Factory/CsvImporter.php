@@ -13,7 +13,6 @@ use ImportBundle\ImportResult\ImportResult;
 use ImportBundle\Filters as Filters;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
-
 class CsvImporter extends Importer implements ImporterInterface
 {
     /**
@@ -24,7 +23,7 @@ class CsvImporter extends Importer implements ImporterInterface
     {
         try {
             $file = new \SplFileObject($file);
-        } catch (\Exception $ex ) {
+        } catch (\Exception $ex) {
             throw new FileNotFoundException();
         }
         $reader = new Reader\CsvReader($file);
@@ -75,7 +74,7 @@ class CsvImporter extends Importer implements ImporterInterface
             (new Filters\ConditionsFilter('productCode',
                 function ($data) {
                     return $data['cost'] >= Filters\ConditionsFilter::COST_MIN_TRESHOLD || $data['stock'] >= Filters\ConditionsFilter::STOCK_MIN_TRESHOLD;
-                }, $message ))
+                }, $message))
                 ->getCallable(), 80);
 
         $filterStep->add(

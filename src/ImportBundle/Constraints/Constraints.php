@@ -34,19 +34,16 @@ class Constraints implements ConstraintsInterface
     {
         $metadata = $this->validator->getMetadataFor($entity);
         $constrainedProperties = $metadata->getConstrainedProperties();
-
         $result = [];
 
-        foreach($constrainedProperties as $constrainedProperty) {
-
+        foreach ($constrainedProperties as $constrainedProperty) {
             $propertyMetadata=$metadata->getPropertyMetadata($constrainedProperty);
             $constraints=$propertyMetadata[0]->constraints;
-            foreach($constraints as $constraint)
-            {
+
+            foreach ($constraints as $constraint) {
                 $result[] = ['field' => $constrainedProperty, 'constraint' => $constraint];
             }
         }
-
         return $result;
     }
 }

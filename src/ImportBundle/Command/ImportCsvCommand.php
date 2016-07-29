@@ -74,6 +74,7 @@ class ImportCsvCommand extends ContainerAwareCommand
                 if ($error instanceof ValidationException) {
                     $violations = $error->getViolations();
                     $aErrors = [];
+                    $productRoot = [];
 
                     foreach ($violations as $violation) {
                         $aErrors[] = $violation->getMessage();
@@ -90,15 +91,13 @@ class ImportCsvCommand extends ContainerAwareCommand
                     $output->writeln('<error>Parse Error line: ' . $parseError . '</error>');
                 }
             }
-                $output->writeln('<fg=red;bg=white>' . $dateEnd . ' Validated items: ' . $importResult->getSuccessCount() . ', Failed items: ' . $errorsAmt . '</>');
+            $output->writeln('<fg=red;bg=white>' . $dateEnd . ' Validated items: ' . $importResult->getSuccessCount() . ', Failed items: ' . $errorsAmt . '</>');
         } else {
-            if($testRun) {
+            if ($testRun) {
                 $output->writeln($dateEnd . ' <fg=black;bg=green>File data has been successfully parsed!!!</>');
             } else {
                 $output->writeln($dateEnd . ' <fg=black;bg=green>File data has been successfully imported!!!</>');
             }
-
         }
-
     }
 }

@@ -40,8 +40,7 @@ class ImportService
         ImportFactory $factory,
         EntityManager $entityManager,
         ValidatorInterface $validator
-    )
-    {
+    ) {
         $this->factory = $factory;
         $this->entityManager = $entityManager;
         $this->validator = $validator;
@@ -52,7 +51,8 @@ class ImportService
      * @param $testRun
      * @return \ImportBundle\ImportResult\ImportResult
      */
-    public function startImport($filePath, $testRun) {
+    public function startImport($filePath, $testRun)
+    {
         $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
         $importer = $this->factory->createImporter($fileExtension, $testRun);
         $result = $importer->import($filePath);
