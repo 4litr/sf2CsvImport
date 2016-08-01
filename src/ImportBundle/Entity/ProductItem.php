@@ -93,6 +93,11 @@ class ProductItem
         return $this;
     }
 
+    public function getProductName()
+    {
+        return $this->productName;
+    }
+
     /**
      * @param string $productDesc
      * @return ProductItem
@@ -101,6 +106,11 @@ class ProductItem
     {
         $this->productDesc = $productDesc;
         return $this;
+    }
+
+    public function getProductDesc()
+    {
+        return $this->productDesc;
     }
 
     /**
@@ -113,6 +123,11 @@ class ProductItem
         return $this;
     }
 
+    public function getProductCode()
+    {
+        return $this->productCode;
+    }
+
     /**
      * @param $stock
      * @return $this
@@ -121,6 +136,11 @@ class ProductItem
     {
         $this->stock = $stock;
         return $this;
+    }
+
+    public function getStock()
+    {
+        return $this->stock;
     }
 
     /**
@@ -133,6 +153,11 @@ class ProductItem
         return $this;
     }
 
+    public function getCost()
+    {
+        return $this->cost;
+    }
+
     /**
      * @ORM\PrePersist
      */
@@ -142,10 +167,25 @@ class ProductItem
         return $this;
     }
 
+    public function getDateAdded()
+    {
+        return $this->dateAdded;
+    }
+
     public function setDateDiscontinued($isDiscontinued)
     {
         $this->dateDiscontinued = ($isDiscontinued === 'yes') ? new \DateTime() : null;
         return $this;
+    }
+
+    public function getDateDiscontinued()
+    {
+        return $this->dateDiscontinued;
+    }
+
+    public function getProductDataId()
+    {
+        return $this->intProductDataId;
     }
 
     /**
